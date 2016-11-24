@@ -1,0 +1,50 @@
+function Fplot(f,a,left,right,n)
+%TAYLORPLOT: MATLAB function M-file that takes as input
+%a function in inline form, a center point a, a left endpoint,
+%a right endpoint, and an order, and plots
+%the Taylor polynomial along with the function at the given order.
+
+
+syms x
+p = vectorize(taylor(f(x),n+1,a));
+x=linspace(left,right,100);
+f=f(x);
+p=eval(p);
+
+subplot(3,2,1);
+plot(x,f,'-',x,p,'r')
+
+grid on;
+
+subplot(3,2,5);
+plot(x, func(x)-ft,'.',x,0*x,'*');  ylabel('mistake');
+grid on;
+
+%legend('approximation of sin(x)/x up to O(x^6)',...
+%       'approximation of sin(x)/x up to O(x^8)',...
+%       'approximation of sin(x)/x up to O(x^{10})',...
+%       'sin(x)/x','Location','Best')
+%title('Taylor Series Expansion')
+
+%title(['Temperature is ',num2str(c),'C'])
+%title(['Case number #',int2str(n)],'Color','y')
+%title({'First line';'Second line'})
+
+
+subplot(3,2,4); 
+plot(x,f,'-',x, func(x),'r');  
+title({'First line';'Second line'})
+%ylabel('sin(x) "-"              func(x) "-"');
+grid on;
+  
+subplot(3,2,5);
+plot(x, func(x)-f,'.',x,0*x,'*');  ylabel('mistake');
+grid on;
+  
+subplot(3,2,6);
+semilogy(x,abs(sin(x)-f),'.');  ylabel('log mistake');
+grid on
+  
+pause()
+close
+end

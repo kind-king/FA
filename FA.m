@@ -12,16 +12,23 @@ close all;  % закрити всі графічні вінка
   nf = 0;                       % нижній порядок Функціонального аналізу
   n=Nf-nf;
   % константи для базису
-  %        1:n+1
-  H(1:n+1)=100;
+  %       w=1:n+1;
+  %d=10.^(n+4-w); M0=2.682e-020
+  % [1e+013       1e+012       1e+011       1e+010       1e+009
+  % 1e+008       1e+007       1e+006       1e+005        1e+004
+  % 1e+003]; M0=2.682e-020
+         w=1:n+1;
+  d=10.^(n+4-w);
+  %d=[1e+013       1.e+012       1e+011       1e+010       1e+009       1e+008       1e+007       1e+006       1e+005        1.0e+004         1.e+003];
+  H(1:n+1)=1; %d
   t=0.3;                        % затримка для паузи
   
-  Nt = 6;                       % порядок Тейлора
-  %nt = 0;                      % нижній порядок Тейлора
+  Nt = 3;                       % порядок Тейлора
+  nt = 0;                       % нижній порядок Тейлора
   %Nch = 6;                     % порядок Чебушева
   %nch = 0;                     % нижній порядок Чебушева
   p1=0;                         % нижні межі промужку апроксимації
-  p2=(1/4)*pi;                  % верхні межі промужку апроксимації
+  p2=(1/4)*pi*10;                   % верхні межі промужку апроксимації
   p=(p2-p1)/2+p1;               % середина проміжку апроксимації
   
   %global kf, jf
@@ -52,33 +59,33 @@ close all;  % закрити всі графічні вінка
   P=FullBasis(nf,Nf,p1,p2,H);
   'wait... ... ...'
   for k=0:n
-      for j=0:n
-          'wait...'
-          Y(n+1-k,n+1-j)=quad(@(x)Basis2Poly(x,P(k+1,1:end),P(j+1,1:end)),p1,p2);
-          'wait... ...'
-          Y1(n+1-k,n+1-j)=quad(@(x)Basis2(x,k+nf,j+nf),p1,p2);  
-      end
+      %for j=0:n
+      %    'wait...'
+      %    Y(n+1-k,n+1-j)=quad(@(x)Basis2Poly(x,P(k+1,1:end),P(j+1,1:end)),p1,p2);
+      %    'wait... ...'
+      %    Y1(n+1-k,n+1-j)=quad(@(x)Basis2(x,k+nf,j+nf),p1,p2);  
+      %end
       'wait... ... ...'
       Y0(n+1-k)=ConvInt(P(k+1,1:end),p1,p2);
       %conv(P(k+1,1:end),P(k+1,1:end));       %P(k+1,1:end)
       'wait... ... ... ...'
       E(n+1-k)=quad(@(x)BasisPolyFunc(x,P(k+1,1:end)),p1,p2);
-      'wait... ... ... ... ...'
-      E1(n+1-k)=quad(@(x)BasisFun(x+nf,k+nf),p1,p2);
+      %'wait... ... ... ... ...'
+      %E1(n+1-k)=quad(@(x)BasisFun(x+nf,k+nf),p1,p2);
   end
   
-  Det=det(Y) % перевірка чи матриця добре обумовлена
-  C1=E/Y; % поліноміальні коефіцієнти
+%  Det=det(Y) % перевірка чи матриця добре обумовлена
+%  C1=E/Y; % поліноміальні коефіцієнти
   C0=E./Y0; % похибка матриці відсутня через метод обрахування без застосування матриці
   Mis0=0
-  options.TRANSA=true;
-  C=linsolve(Y,E',options); % поліноміальні коефіцієнти
-  Mis=(C'*Y-E)'  % перевірка похибки C (не ідеальна матриця)
-  Mis1=(C1*Y-E)'  % перевірка похибки C1 (не ідеальна матриця)
+%  options.TRANSA=true;
+%  C=linsolve(Y,E',options); % поліноміальні коефіцієнти
+%  Mis=(C'*Y-E)'  % перевірка похибки C (не ідеальна матриця)
+%  Mis1=(C1*Y-E)'  % перевірка похибки C1 (не ідеальна матриця)
   %v=length(C) %Nf-nf+1
   %w = conv(C,v)
-  C2=E/Y; % поліноміальні коефіцієнти
-  C3=linsolve(Y1,E1',options); % поліноміальні коефіцієнти
+  %C2=E1/Y1; % поліноміальні коефіцієнти
+%  C3=linsolve(Y1,E1',options); % поліноміальні коефіцієнти
   %C1=polyint(C)
   
   %for
@@ -86,92 +93,143 @@ close all;  % закрити всі графічні вінка
   %end
   %C=C1; % швижка заміна змінної % результат індентичний
   
-  x = p1:.001:p2;
-  y=0;
+  %syms x
+  %tf=taylor(@(x)func(x),Nt+1,x,p);
+  %taylor('sin(x)',Nt,x,0)
+  %pretty(tf)
+  
+  %taylorplot(f,a,left,right,n)
+  
+  %f=inline('sin(x)')
+  %taylorplot(@(x)func(x),p,p1,p2,Nt); ylabel('sin(x) "-"              Tfunc(x) "-"');
+  %grid on;
+  
+  %pause()
+  %close
+  %taylorplot(@(x)func(x),Nt,pi,1)
+  
+  %x = p1:.001:p2;
+  syms x
+  f=@(x)func(x);
+  %Taylor=ftaylor(@(x)func(x),p,Nt); % формула Тейлора
+  %tp = vectorize(taylor(f(x),n+1,a)); 
+  
+  x=linspace(p1,p2,100);
+  
+  %f=@(x)func(x);
+  %tp=eval(Taylor);
+  
+  %  y=0;
   y0=0;
-  y1=0;
+%  y1=0;
   for r=1:n+1
-      y=C(n+2-r)*basisPoly(x,P(r,1:end))+y;
+      Taylor=ftaylor(@(x)func(x),p,nt+r-1); % формула Тейлора
+      tp=eval(Taylor);
+%      y=C(n+2-r)*basisPoly(x,P(r,1:end))+y;
       y0=C0(n+2-r)*basisPoly(x,P(r,1:end))+y0;
-      y1=C3(n+2-r)*basis(x,r+nf-1)+y1;
+%      y1=C3(n+2-r)*basis(x,r+nf-1)+y1;
       %y1=C2(n+2-r)*basis(x,r+nf-1)+y1;
-      plot(x,C(n+2-r)*basisPoly(x,P(r,1:end)));  ylabel('Basis1');
+%      plot(x,C(n+2-r)*basisPoly(x,P(r,1:end)));  ylabel('Basis1');
       %hold on;
-      grid on;
-      pause()
-      plot(x,C0(n+2-r)*basisPoly(x,P(r,1:end)));  ylabel('Basis2');
+%      grid on;
+%      pause()
+   %   plot(x,C0(n+2-r)*basisPoly(x,P(r,1:end)));  ylabel('Basis2');
       %hold on;
-      grid on;
-      pause()
-  end
+   %   grid on;
+   %   pause(t)
+   
+    %title(['Temperature is ',num2str(c),'C'])
+    %title(['Case number #',int2str(n)],'Color','y')
+    %title({'First line';'Second line'})
+    figure(r);
+    %subplot(3,2,1);
+    %plot(x,func(x),'-',x,tp1,'r')
+    %grid on;
+    
+    Fplot(x,tp,y0,C0(n+2-r));
+    
+    %figure('Name','Simulation Plot Window','NumberTitle','off')
+ %    subplot(3,1,1); 
+ % plot(x,y0,'-',x, sin(x),'-');  ylabel('sin(x) "-"              FAfunc(x) "-"');
+ % grid on;
+  
+ % subplot(3,1,2);
+ % plot(x, sin(x)-y0,'.',x,0*x,'*');  ylabel('mistake');
+ % grid on;
+  
+ % subplot(3,1,3);
+ % semilogy(x,abs(sin(x)-y0),'.');  ylabel('log mistake');
+ % grid on
+  pause()
   close
-  C
+  
+  
+  end
+  %close
+%  C
   C0'
-  C1'
-  M0=sum( (sin(x)-y0).^2 )
-  M=sum( (sin(x)-y).^2 ) 
+%  C1'
+  
+%  M=sum( (sin(x)-y).^2 ) 
   %y=polyval(C,x);
   %plot(y);
   
-  figure(5);
   
-  subplot(3,1,1); 
+  
+%  subplot(3,1,1); 
   %plot(x,y,'.');  %ylabel('func(x) .');
   %grid on;
   %hold on;
-  plot(x,y,'.',x, sin(x),'-');  ylabel('sin(x) "-"              func(x) "."');
-  grid on;
+%  plot(x,y,'.',x, sin(x),'-');  ylabel('sin(x) "-"              func(x) "."');
+%  grid on;
   
-  subplot(3,1,2);
-  plot(x, sin(x)-y,'.',x,0*x,'*');  ylabel('mistake');
-  grid on;
+%  subplot(3,1,2);
+%  plot(x, sin(x)-y,'.',x,0*x,'*');  ylabel('mistake');
+%  grid on;
   
-  subplot(3,1,3);
-  semilogy(x,abs(sin(x)-y),'.');  ylabel('log mistake');
-  grid on
-  pause()
-  close
+%  subplot(3,1,3);
+%  semilogy(x,abs(sin(x)-y),'.');  ylabel('log mistake');
+%  grid on
+%  pause()
+%  close
   
    
-  subplot(3,1,1); 
-  plot(x,y0,'.',x, sin(x),'-');  ylabel('sin(x) "-"              func(x) "."');
-  grid on;
-  
-  subplot(3,1,2);
-  plot(x, sin(x)-y0,'.',x,0*x,'*');  ylabel('mistake');
-  grid on;
-  
-  subplot(3,1,3);
-  semilogy(x,abs(sin(x)-y0),'.');  ylabel('log mistake');
-  grid on
-  pause()
-  close
+
   
   
   
-  for r=1:n+1
-      plot(x,C3(n+2-r)*basis(x,r+nf-1));  ylabel('Basis3');
-      grid on;
-      pause(t)
-  end
-  close
-  M1=sum( (sin(x)-y1).^2 ) 
+  
+%  for r=1:n+1
+%      plot(x,C3(n+2-r)*basis(x,r+nf-1));  ylabel('Basis3');
+%      grid on;
+%      pause(t)
+%  end
+%  close
+%  M1=sum( (sin(x)-y1).^2 ) 
   
   
-  subplot(3,1,1); 
-  plot(x,y1,'.',x, sin(x),'-');  ylabel('sin(x) "-"              func(x) "."');
-  grid on;
+%  subplot(3,1,1); 
+%  plot(x,y1,'.',x, sin(x),'-');  ylabel('sin(x) "-"              func(x) "."');
+%  grid on;
   
-  subplot(3,1,2);
-  plot(x, sin(x)-y1,'.',x,0*x,'*');  ylabel('mistake');
-  grid on;
+%  subplot(3,1,2);
+%  plot(x, sin(x)-y1,'.',x,0*x,'*');  ylabel('mistake');
+%  grid on;
   
-  subplot(3,1,3);
-  semilogy(x,abs(sin(x)-y1),'.');  ylabel('log mistake');
-  grid on
-  pause()
-  close
+%  subplot(3,1,3);
+%  semilogy(x,abs(sin(x)-y1),'.');  ylabel('log mistake');
+%  grid on
+%  pause()
+%  close
   
+
+%legend('approximation of sin(x)/x up to O(x^6)',...
+%       'approximation of sin(x)/x up to O(x^8)',...
+%       'approximation of sin(x)/x up to O(x^{10})',...
+%       'sin(x)/x','Location','Best')
+%title('Taylor Series Expansion')
+
+
   
   %plot(x,sin(x),'-',x,y,'.');  ylabel('sin(x) "-"     func(x) "."');
   %grid on;
@@ -181,10 +239,7 @@ close all;  % закрити всі графічні вінка
   
   %abs(sin(x)-y);
   
-  %syms x
-  %tf=taylor('func(x)',Nt,x,0)
-  %taylor('sin(x)',Nt,x,0)
-  %pretty(tf)
+  
   
   %Y(0,1)=1;
   %Y(kf+1,jf+1)=quad(@(x)Basis2(x,kf,jf),p1,p2);% інтеграл базисних функцій
