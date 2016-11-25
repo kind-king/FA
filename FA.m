@@ -3,7 +3,7 @@ close all;  % закрити всі графічні вінка
 
 % налаштування параметрів графічних вікон для виведення графіків
   scrsz = get(0,'ScreenSize');                                              % отримати розміри екрану
-  set(0,'defaultFigurePosition',[scrsz(3)/4 50 scrsz(3)*3/4 scrsz(4)-130])  % отримати розміри екрану
+  set(0,'defaultFigurePosition',[scrsz(3)*0/4+9 48 scrsz(3)*4/4-18 scrsz(4)-124])  % отримати розміри екрану
   set(0,'defaultTextFontName','MS Sans Serif')                              % встановити фонт для відображення кирилиці
 
   format short g 
@@ -18,17 +18,20 @@ close all;  % закрити всі графічні вінка
   % 1e+008       1e+007       1e+006       1e+005        1e+004
   % 1e+003]; M0=2.682e-020
          w=1:n+1;
-  d=10.^(n+4-w);
+         %u=[0.400000000000000;1.09544511501033;1.41421356237311;1.67332005306808;1.89736659609680;2.09761769609492;2.28035085438274;2.44948974968094;2.60767756751292;2.75707700133031;2.90183169193382;]
+         % коефіцієнти нормованого базису
+         d=10.^(n+4-w);
   %d=[1e+013       1.e+012       1e+011       1e+010       1e+009       1e+008       1e+007       1e+006       1e+005        1.0e+004         1.e+003];
-  H(1:n+1)=1; %d
+  H(1:n+1)=d; %d                % довільні коефіцієнти (нормуючі) для ортогонального базису
   t=0.3;                        % затримка для паузи
+  discrete=100;                 % кількість дискретів на графіку
   
   Nt = 3;                       % порядок Тейлора
   nt = 0;                       % нижній порядок Тейлора
   %Nch = 6;                     % порядок Чебушева
   %nch = 0;                     % нижній порядок Чебушева
   p1=0;                         % нижні межі промужку апроксимації
-  p2=(1/4)*pi*10;                   % верхні межі промужку апроксимації
+  p2=(1/4)*1*10;               % верхні межі промужку апроксимації
   p=(p2-p1)/2+p1;               % середина проміжку апроксимації
   
   %global kf, jf
@@ -56,7 +59,9 @@ close all;  % закрити всі графічні вінка
           %E(k-nf+1)
   %    end
   %end
+  
   P=FullBasis(nf,Nf,p1,p2,H);
+  
   'wait... ... ...'
   for k=0:n
       %for j=0:n
@@ -66,10 +71,10 @@ close all;  % закрити всі графічні вінка
       %    Y1(n+1-k,n+1-j)=quad(@(x)Basis2(x,k+nf,j+nf),p1,p2);  
       %end
       'wait... ... ...'
-      Y0(n+1-k)=ConvInt(P(k+1,1:end),p1,p2);
+      Y0(n+2-k)=ConvInt(P(k+1,1:end),p1,p2); %=1
       %conv(P(k+1,1:end),P(k+1,1:end));       %P(k+1,1:end)
       'wait... ... ... ...'
-      E(n+1-k)=quad(@(x)BasisPolyFunc(x,P(k+1,1:end)),p1,p2);
+      E(n+2-k)=quad(@(x)BasisPolyFunc(x,P(k+1,1:end)),p1,p2);
       %'wait... ... ... ... ...'
       %E1(n+1-k)=quad(@(x)BasisFun(x+nf,k+nf),p1,p2);
   end
@@ -77,7 +82,9 @@ close all;  % закрити всі графічні вінка
 %  Det=det(Y) % перевірка чи матриця добре обумовлена
 %  C1=E/Y; % поліноміальні коефіцієнти
   C0=E./Y0; % похибка матриці відсутня через метод обрахування без застосування матриці
-  Mis0=0
+  C0(1)=0;
+  %C0=E; % формула для нормованого базису
+  %Mis0=0
 %  options.TRANSA=true;
 %  C=linsolve(Y,E',options); % поліноміальні коефіцієнти
 %  Mis=(C'*Y-E)'  % перевірка похибки C (не ідеальна матриця)
@@ -109,24 +116,27 @@ close all;  % закрити всі графічні вінка
   %taylorplot(@(x)func(x),Nt,pi,1)
   
   %x = p1:.001:p2;
-  syms x
-  f=@(x)func(x);
+  %syms x
+  %f=@(x)func(x);
   %Taylor=ftaylor(@(x)func(x),p,Nt); % формула Тейлора
   %tp = vectorize(taylor(f(x),n+1,a)); 
   
-  x=linspace(p1,p2,100);
+  x=linspace(p1,p2,discrete);
   
   %f=@(x)func(x);
   %tp=eval(Taylor);
-  
+  P(n+2,1:end)=0;
   %  y=0;
   y0=0;
 %  y1=0;
+  figure('Name','Порівняльна характеристика апроксимації функції за формулами функціонального аналізу','NumberTitle','off')
+
   for r=1:n+1
       Taylor=ftaylor(@(x)func(x),p,nt+r-1); % формула Тейлора
       tp=eval(Taylor);
 %      y=C(n+2-r)*basisPoly(x,P(r,1:end))+y;
-      y0=C0(n+2-r)*basisPoly(x,P(r,1:end))+y0;
+      
+      y0=C0(n+3-r)*basisPoly(x,P(r,1:end))+y0;
 %      y1=C3(n+2-r)*basis(x,r+nf-1)+y1;
       %y1=C2(n+2-r)*basis(x,r+nf-1)+y1;
 %      plot(x,C(n+2-r)*basisPoly(x,P(r,1:end)));  ylabel('Basis1');
@@ -138,15 +148,17 @@ close all;  % закрити всі графічні вінка
    %   grid on;
    %   pause(t)
    
+   %v=C0(n+2-r)*basisPoly(x,P(r,1:end));
+   
     %title(['Temperature is ',num2str(c),'C'])
     %title(['Case number #',int2str(n)],'Color','y')
     %title({'First line';'Second line'})
-    figure(r);
+    %figure(r);
     %subplot(3,2,1);
     %plot(x,func(x),'-',x,tp1,'r')
     %grid on;
     
-    Fplot(x,tp,y0,C0(n+2-r));
+    Fplot(x,tp,y0,C0(n+2-r)*basisPoly(x,P(r+1,1:end)),discrete,r-1);
     
     %figure('Name','Simulation Plot Window','NumberTitle','off')
  %    subplot(3,1,1); 
@@ -161,11 +173,11 @@ close all;  % закрити всі графічні вінка
  % semilogy(x,abs(sin(x)-y0),'.');  ylabel('log mistake');
  % grid on
   pause()
-  close
+  %close
   
   
   end
-  %close
+  close
 %  C
   C0'
 %  C1'
