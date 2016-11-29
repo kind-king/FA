@@ -44,7 +44,7 @@ grid on;
 subplot(3,2,2); 
 plot(x,func(x),'-b',x,f2,'-r');  
 title(['Degree ',num2str(Number)],'Color','b')
-ylabel('sin(x)');
+ylabel('func(x)');
 grid on;
 
 legend('func(x)',...
